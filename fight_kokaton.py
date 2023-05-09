@@ -94,9 +94,11 @@ class Bomb:
     """
     爆弾に関するクラス
     """
-    bomb_colors = [255,0,30,140,23,150,60,89]
-    bomb_mv = [+1,+2,+3,-1,-2,-3]
-    bomb_size = [1,2,3,4,5]
+    _colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255)]
+    _dires = [-1, 0, +1]
+    #bomb_colors = [255,0,30,140,23,150,60,89]
+    bomb_mv = [+1,0,-1]
+    #bomb_size = [1,2,3,4,5]
 
     def __init__(self, ):
         """
@@ -104,7 +106,8 @@ class Bomb:
         引数1 color：爆弾円の色タプル
         引数2 rad：爆弾円の半径
         """
-        color = (random.choice(Bomb.bomb_colors),random.choice(Bomb.bomb_colors),random.choice(Bomb.bomb_colors))
+        #color = (random.choice(Bomb.bomb_colors),random.choice(Bomb.bomb_colors),random.choice(Bomb.bomb_colors))
+        color = random.choice(Bomb._colors)
         rad = random.randint(10,50)
         self._img = pg.Surface((2*rad, 2*rad))
         pg.draw.circle(self._img, color, (rad, rad), rad)
@@ -145,6 +148,23 @@ class Beam:
         self._rct.move_ip(self._vx, self._vy)
         screen.blit(self.img, self._rct)
     
+
+class Explosion:
+    """
+    爆発えふぇくと
+    """
+    def __init__(self,bomb):
+        self._img0 = pg.image.load("ex03/fig/explosion.gif")
+        img0 = pg.transform.flip(pg.transform.rotozoom(self._img0,0,1.0),False,True)
+        img1 = pg.transform.flip(pg.transform.rotozoom(self._img0,0,1.0),True,False)
+        self._images = [img0,img1]
+        self._rct = self._img0.get_rect()
+        self._rct.center = bomb._rct.center
+        self._life = 2000
+
+    def update(self, screen):
+        screen.blit(self._img0,self._rct)
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -153,9 +173,10 @@ def main():
     Num_of_bombs = 5#爆弾の個数
     bird = Bird(3, (900, 400))
     bombs =[Bomb() for _in in range(Num_of_bombs)]
+    ex = []
     beam = None 
-
     tmr = 0
+
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -166,6 +187,7 @@ def main():
         screen.blit(bg_img, [0, 0])
 
         for bomb in bombs :
+            ex.append(Explosion(bomb))
             bomb.update(screen)
             if bird._rct.colliderect(bomb._rct):
             # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
@@ -180,10 +202,14 @@ def main():
         if beam is not None:#ビームが存在したら
             beam.update(screen)
             for i, bomb in enumerate(bombs):
+                
                 if  beam._rct.colliderect(bomb._rct):
+                    ex[i].update(screen)
                     bird.change_img(6, screen)
                     beam = None
                     del bombs[i]
+                    if ex[i]._life-tmr%2 == 0:
+                        del ex[i]
                     break
                 
         pg.display.update()
