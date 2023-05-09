@@ -166,6 +166,7 @@ class Explosion:
         screen.blit(self._img0,self._rct)
 
 def main():
+    score = 0
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     clock = pg.time.Clock()
@@ -208,10 +209,12 @@ def main():
                     bird.change_img(6, screen)
                     beam = None
                     del bombs[i]
+                    score += 1
                     if ex[i]._life-tmr%2 == 0:
                         del ex[i]
                     break
-                
+        txt = pg.font.Font(None, 80).render(f"score={score}",True,(255,255,255))
+        screen.blit(txt,[0,0])
         pg.display.update()
         clock.tick(1000)
 
