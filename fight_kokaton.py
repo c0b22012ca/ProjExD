@@ -94,18 +94,24 @@ class Bomb:
     """
     爆弾に関するクラス
     """
-    def __init__(self, color: tuple[int, int, int], rad: int):
+    bomb_colors = [255,0,30,140,23,150,60,89]
+    bomb_mv = [+1,+2,+3,-1,-2,-3]
+    bomb_size = [1,2,3,4,5]
+
+    def __init__(self, ):
         """
         引数に基づき爆弾円Surfaceを生成する
         引数1 color：爆弾円の色タプル
         引数2 rad：爆弾円の半径
         """
+        color = (random.choice(Bomb.bomb_colors),random.choice(Bomb.bomb_colors),random.choice(Bomb.bomb_colors))
+        rad = random.randint(10,50)
         self._img = pg.Surface((2*rad, 2*rad))
         pg.draw.circle(self._img, color, (rad, rad), rad)
         self._img.set_colorkey((0, 0, 0))
         self._rct = self._img.get_rect()
         self._rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
-        self._vx, self._vy = +1, +1
+        self._vx, self._vy = random.choice(Bomb.bomb_mv),random.choice(Bomb.bomb_mv)
 
     def update(self, screen: pg.Surface):
         """
@@ -144,10 +150,9 @@ def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     clock = pg.time.Clock()
     bg_img = pg.image.load("ex03/fig/pg_bg.jpg")
-
+    Num_of_bombs = 5#爆弾の個数
     bird = Bird(3, (900, 400))
-    bomb = Bomb((255, 0, 0), 10)
-
+    bombs =[Bomb() for _in in range(Num_of_bombs)]
     beam = None 
 
     tmr = 0
@@ -160,7 +165,7 @@ def main():
         tmr += 1
         screen.blit(bg_img, [0, 0])
 
-        if bomb is not None :
+        for bomb in bombs :
             bomb.update(screen)
             if bird._rct.colliderect(bomb._rct):
             # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
@@ -174,10 +179,13 @@ def main():
         
         if beam is not None:#ビームが存在したら
             beam.update(screen)
-            if bomb is not None and beam._rct.colliderect(bomb._rct):
-                bird.change_img(6, screen)
-                beam = None
-                bomb = None
+            for i, bomb in enumerate(bombs):
+                if  beam._rct.colliderect(bomb._rct):
+                    bird.change_img(6, screen)
+                    beam = None
+                    del bombs[i]
+                    break
+                
         pg.display.update()
         clock.tick(1000)
 
