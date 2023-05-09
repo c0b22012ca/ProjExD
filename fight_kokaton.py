@@ -177,7 +177,7 @@ def main():
     ex = []
     beam = None 
     tmr = 0
-
+    tim = 0
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -194,6 +194,8 @@ def main():
             # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
                 bird.change_img(8, screen)
                 pg.display.update()
+                tim = pg.font.Font(None, 80).render(f"time={tmr}",True,(255,255,255))
+                screen.blit(tim,[0,80])
                 time.sleep(1)
                 return
 
@@ -209,12 +211,20 @@ def main():
                     bird.change_img(6, screen)
                     beam = None
                     del bombs[i]
+                    if bombs == []:
+
+                        time.sleep(1)
+                        tim = pg.font.Font(None, 80).render(f"time={tmr}",True,(255,255,255))
+                        screen.blit(tim,[0,80])
+                        return
                     score += 1
                     if ex[i]._life-tmr%2 == 0:
                         del ex[i]
                     break
         txt = pg.font.Font(None, 80).render(f"score={score}",True,(255,255,255))
         screen.blit(txt,[0,0])
+        tim = pg.font.Font(None, 80).render(f"time={tmr}",True,(255,255,255))
+        screen.blit(tim,[0,80])
         pg.display.update()
         clock.tick(1000)
 
