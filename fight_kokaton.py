@@ -49,19 +49,22 @@ class Bird:
             True, 
             False
         )
+        
+        img0 = pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"), 0, 2.0)  # 左向き，2倍
+        img1 = pg.transform.flip(img0, True, False)  # 右向き，2倍
+        self._imgs = {
+            (+1, 0): img1,  # 右
+            (+1, -1): pg.transform.rotozoom(img1, 45, 1.0),  # 右上
+            (0, -1): pg.transform.rotozoom(img1, 90, 1.0),  # 上
+            (-1, -1): pg.transform.rotozoom(img0, -45, 1.0), # 左上
+            (-1, 0): img0,  # 左
+            (-1, +1): pg.transform.rotozoom(img0, 45, 1.0),  # 左下
+            (0, +1): pg.transform.rotozoom(img1, -90, 1.0),  # 下
+            (+1, +1): pg.transform.rotozoom(img1, -45, 1.0),  # 右下
+        }
+        self._img = self._imgs[(+1, 0)]   # デフォルトで右 
         self._rct = self._img.get_rect()
         self._rct.center = xy
-        self.images= {(+1,0):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),0,2.0),True,False),
-                      (+1,-1):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),45,2.0),True,False),
-                      (0,-1):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),90,2.0),True,False),
-                      (-1,-1):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),-45,2.0),False,True),
-                      (-1,0):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),0,2.0),False,True),
-                      (-1,+1):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),45,2.0),False,True),
-                      (0,+1):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),-90,2.0),True,False),
-                      (+1,+1):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),-45,2.0),True,False),
-                      (0,0):pg.transform.flip(pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"),0,2.0),False,True),
-        }
-                      
     def change_img(self, num: int, screen: pg.Surface):#メソッド
         """
         こうかとん画像を切り替え，画面に転送する
@@ -87,7 +90,8 @@ class Bird:
             for k, mv in __class__._delta.items():
                 if key_lst[k]:
                     self._rct.move_ip(-mv[0], -mv[1])
-        self._img = self.images[sum_mv[0],sum_mv[1]]
+        if not (sum_mv[0] == 0 and sum_mv[1] == 0):
+            self._img = self._imgs[tuple(sum_mv)]
         screen.blit(self._img, self._rct)
     
 class Bomb:
